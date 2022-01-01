@@ -4,15 +4,15 @@ import requests
 from flask import Flask, g, jsonify
 from flask_restful import Api, Resource, reqparse
 import os
-from  requests_oauthlib import OAuth1Session
+from requests_oauthlib import OAuth1Session
 from random import randint
 
 
-app = Flask(__name__, static_url_path="/assets/public/index.html", static_folder="assets")
+app = Flask(__name__, static_url_path="/assets/public/index.html",
+            static_folder="assets")
 api = Api(app)
 app.config.from_object("settings")
 
-headers = {'Authorization': app.config["BEARER_TOKEN"], 'Accept': 'application/json', 'Content-Type': 'application/json'}
 
 def _get_token():
     """
@@ -75,42 +75,70 @@ def user_show(screen_name=None, user_id=None):
         headers={"Authorization": "Bearer " + g.access_token},
         params={"user_id": user_id} if user_id else {"screen_name": screen_name},
     )
-    
+
+
 @app.errorhandler(404)
 def not_found(e):
     return app.send_static_file('index.html')
+
 
 @app.route('/')
 def index():
     return app.send_static_file('index.html')
 
+
 class SearchTweet(Resource):
     def get(self, tweet):
         _get_token()
-        headers = {'Authorization': app.config["BEARER_TOKEN"], 'Accept': 'application/json', 'Content-Type': 'application/json'}
+        token = g.access_token or app.config["BEARER_TOKEN"]
+        headers = {'Authorization': f"Bearer {token}",
+                   'Accept': 'application/json', 'Content-Type': 'application/json'}
         payload = {'q': tweet, 'result_type': 'recent', 'count': 10}
-        searchTweet = requests.get('https://api.twitter.com/2/search/tweets.json', params=payload, headers=headers).json()
+        searchTweet = requests.get(
+            'https://api.twitter.com/2/search/tweets.json', params=payload, headers=headers).json()
         print(payload)
         return jsonify(searchTweet)
 
+
 api.add_resource(SearchTweet, '/api/searchtweet/<string:tweet>')
 
-class SearchUser(Resource):
-    def get(self, user):
-        _get_token()
-        headers = {'Authorization': app.config["BEARER_TOKEN"], 'Accept' : 'application/json', 'Content-Type':'application/json'}
-        payload = {'q':'from:' + user, 'result_type':'recent', 'count': 10}
-        searchUser = requests.get('https://api.twitter.com/2/users/', params=payload, headers=headers).json()
-        return jsonify(searchUser)
 
-api.add_resource(SearchUser, '/api/searchuser/<string:user>')
+class SearchUser(Resource):
+    def get(self, user, count):
+        if not user or not count:
+            print("ERROR")
+            return jsonify({})
+        _get_token()
+        token = g.access_token or app.config["BEARER_TOKEN"]
+        print(user+"--"+str(count) + "----" + token)
+        headers = {'Authorization': f"Bearer {token}",
+                   'Accept': 'application/json', 'Content-Type': 'application/json'}
+
+        searchUser = requests.get(f"https://api.twitter.com/2/users/by/username/{user}",
+                                  headers=headers).json()
+
+        id = searchUser["data"]["id"]
+        # do something with id, store in redis or something for a session
+        # two step process, because v2 doesn't let you get the tweets from the username
+        last_count_tweets = requests.get(
+            f"https://api.twitter.com/2/users/{id}/tweets?max_results={count}", headers=headers).json()
+
+        return jsonify(last_count_tweets)
+
+
+api.add_resource(SearchUser, '/api/searchuser/<string:user>/<int:count>')
+
 
 class RandomTweet(Resource):
     def get(self, user):
+        token = g.access_token or app.config["BEARER_TOKEN"]
         payload6 = {'q': 'from:' + user, 'result_type': 'recent', 'count': 20}
-        results = requests.get('https://api.twitter.com/2/search/tweets.json', params=payload6, headers=headers).json()
+        headers = {'Authorization': f"Bearer {token}",
+                   'Accept': 'application/json', 'Content-Type': 'application/json'}
+        results = requests.get(
+            'https://api.twitter.com/2/search/tweets.json', params=payload6, headers=headers).json()
         number = randint(1, 20)
         return jsonify(results['statuses'][number])
 
-api.add_resource(RandomTweet, '/api/random-tweet/<string:user>')
 
+api.add_resource(RandomTweet, '/api/random-tweet/<string:user>')
