@@ -108,7 +108,7 @@ class SearchUser(Resource):
         if not user or not count:
             print("ERROR")
             return jsonify({})
-        _get_token()
+        # _get_token()
         token = g.access_token or app.config["BEARER_TOKEN"]
         print(user+"--"+str(count) + "----" + token)
         headers = {'Authorization': f"Bearer {token}",
