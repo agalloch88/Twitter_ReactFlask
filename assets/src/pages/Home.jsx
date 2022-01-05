@@ -34,7 +34,7 @@ function Home() {
                 </Card.Title>
               </div>
               <Card.Text style={{ fontSize: "15px" }}>
-                Welcome to my Twitter display app! It's built with Flask and React. You can search for Twitter accounts via the Search page, or check out a Random result via the Random page. This interacts with v2 of the Twitter API. 
+                Welcome to my Twitter display app! It's built with Flask and React. You can search for Twitter accounts via the Search page. This interacts with v2 of the Twitter API. 
               </Card.Text>
               <Card.Img
                 variant="top"

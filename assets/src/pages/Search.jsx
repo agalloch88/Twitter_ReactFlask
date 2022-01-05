@@ -9,11 +9,9 @@ class Search extends React.Component {
       value: "",
       tweets: [],
       profile: {id: "", name: "", profile_image_url: "", username: ""},
-      tweetFinder: [],
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleUserNameSubmit = this.handleUserNameSubmit.bind(this);
-    this.handleTweetSubmit = this.handleTweetSubmit.bind(this);
   }
 
   handleChange(e) {
@@ -26,23 +24,11 @@ class Search extends React.Component {
     currentValue > "" ? 
       fetch(`/api/searchuser/${currentValue}/10`)
         .then((res) => res.json())
+        // .then((data) => console.log(data))
         .then((data) => this.setState({ tweets: [...data.data], profile: data.profile.data }))
         .catch((err) => console.log(err))
      : alert("Please enter a valid username")
      e.target.reset();
-  };
-
-  handleTweetSubmit = (e) => {
-    e.preventDefault();
-    let currentValue = this.state.value;
-    currentValue > "" 
-    ? fetch(`/api/searchtweet/${currentValue}`)
-        .then((res) => res.json())
-        .then((data) => this.setState({ tweetFinder: data.statuses }))
-        .catch((err) => console.log(err))
-    : 
-      alert("Please enter a valid search")
-      e.target.reset();
   };
 
   render() {
@@ -60,10 +46,6 @@ class Search extends React.Component {
       <TwitterCard key={tweet.id} tweet={tweet} profile={this.state.profile} />
     ))
 
-    const finderTweets = this.state.tweetFinder.map(tweet => (
-      <TwitterCard key={tweet.id} tweets={tweet} />
-    ))
-
     return (
       <div className="search">
         <div style={cardStyle}>
@@ -77,16 +59,8 @@ class Search extends React.Component {
               />
             </form>
             <br />
-            <form onSubmit={this.handleTweetSubmit}>
-              <UserInput
-                placeholder="Find Tweet"
-                name="findTweet"
-                handleChange={this.handleChange}
-              />
-            </form>
           </div>
           {userTweets}
-          {finderTweets}
         </div>
       </div>
     );

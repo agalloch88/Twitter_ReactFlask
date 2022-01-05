@@ -87,22 +87,6 @@ def index():
     return app.send_static_file('index.html')
 
 
-class SearchTweet(Resource):
-    def get(self, tweet):
-        _get_token()
-        token = g.access_token or app.config["BEARER_TOKEN"]
-        headers = {'Authorization': f"Bearer {token}",
-                   'Accept': 'application/json', 'Content-Type': 'application/json'}
-        payload = {'q': tweet, 'result_type': 'recent', 'count': 10}
-        searchTweet = requests.get(
-            'https://api.twitter.com/2/search/tweets.json', params=payload, headers=headers).json()
-        print(payload)
-        return jsonify(searchTweet)
-
-
-api.add_resource(SearchTweet, '/api/searchtweet/<string:tweet>')
-
-
 class SearchUser(Resource):
     def get(self, user, count):
         if not user or not count:
@@ -120,25 +104,11 @@ class SearchUser(Resource):
         id = searchUser["data"]["id"]
         # do something with id, store in redis or something for a session
         # two step process, because v2 doesn't let you get the tweets from the username
+        tweet_params = {"tweet.fields": "created_at"}
         last_count_tweets = requests.get(
-            f"https://api.twitter.com/2/users/{id}/tweets?max_results={count}", headers=headers).json()
+            f"https://api.twitter.com/2/users/{id}/tweets?max_results={count}", headers=headers, params=tweet_params).json()
         last_count_tweets["profile"] = searchUser
         return jsonify(last_count_tweets)
 
 
 api.add_resource(SearchUser, '/api/searchuser/<string:user>/<int:count>')
-
-
-class RandomTweet(Resource):
-    def get(self, user):
-        token = g.access_token or app.config["BEARER_TOKEN"]
-        payload6 = {'q': 'from:' + user, 'result_type': 'recent', 'count': 20}
-        headers = {'Authorization': f"Bearer {token}",
-                   'Accept': 'application/json', 'Content-Type': 'application/json'}
-        results = requests.get(
-            'https://api.twitter.com/2/search/tweets.json', params=payload6, headers=headers).json()
-        number = randint(1, 20)
-        return jsonify(results['statuses'][number])
-
-
-api.add_resource(RandomTweet, '/api/random-tweet/<string:user>')

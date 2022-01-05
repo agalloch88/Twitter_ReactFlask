@@ -27,11 +27,6 @@ function NavigationBar() {
               Search
             </NavLink>
           </li>
-          <li className="navbar-item">
-            <NavLink to="/random" className="nav-link">
-              Random
-            </NavLink>
-          </li>
         </ul>
       </div>
     </nav>
