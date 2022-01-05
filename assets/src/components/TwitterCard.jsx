@@ -7,12 +7,12 @@ import Share from "../images/Share.png";
 import Settings from "../images/Settings.png";
 import BlueCheck from "../images/BlueCheck.png";
 
-function TwitterCard({ tweets }) {
+function TwitterCard({ tweet, profile }) {
   return (
     <div >
-      <Card id={tweets.id} style={{ width: "35rem", margin: "35px", cursor:'pointer'}} className="shadow-lg p-3 mb-5 bg-white rounded" >
+      <Card id={tweet.id} style={{ width: "35rem", margin: "35px", cursor:'pointer'}} className="shadow-lg p-3 mb-5 bg-white rounded" >
         <Card.Body>
-          <img alt='Profile' style={{ borderRadius: "50%" }} src={tweets.user.profile_image_url}></img>
+          <img alt='Profile' style={{ borderRadius: "50%" }} src={profile.profile_image_url}></img>
           <img
             alt="setting"
             variant="top"
@@ -20,10 +20,10 @@ function TwitterCard({ tweets }) {
             style={{ marginLeft: "450px" }}
           />
           <Card.Title style={{ fontSize: "15px", fontWeight: "bolder" }}>
-            {tweets.user.name} { tweets.user.verified ? <img alt="blue check" variant="top" src={BlueCheck} /> : null}
-            <p style={{ fontSize: "15px", color: "gray" }}>@{tweets.user.screen_name}</p>
+            {profile.name} { profile.verified ? <img alt="blue check" variant="top" src={BlueCheck} /> : null}
+            <p style={{ fontSize: "15px", color: "gray" }}>@{profile.username}</p>
           </Card.Title>
-          <Card.Text>{tweets.text}</Card.Text>
+          <Card.Text>{tweet.text}</Card.Text>
           <div
             className="twitterIcons"
             style={{
@@ -33,13 +33,13 @@ function TwitterCard({ tweets }) {
             }}
           >
             <p>
-              <img alt="comment" variant="top" src={Comment} /> {tweets.comments}
+              <img alt="comment" variant="top" src={Comment} /> {tweet.comments}
             </p>
             <p>
-              <img alt="retweet" variant="top" src={Retweet} /> {tweets.retweet_count}
+              <img alt="retweet" variant="top" src={Retweet} /> {tweet.retweet_count}
             </p>
             <p>
-              <img alt="heart" variant="top" src={HeartImage} /> {tweets.favorite_count}
+              <img alt="heart" variant="top" src={HeartImage} /> {tweet.favorite_count}
             </p>
             <p>
               <img alt="share" variant="top" src={Share} />

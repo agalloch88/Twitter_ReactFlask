@@ -8,7 +8,8 @@ class Search extends React.Component {
     this.state = {
       value: "",
       tweets: [],
-      tweetFinder: []
+      profile: {id: "", name: "", profile_image_url: "", username: ""},
+      tweetFinder: [],
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleUserNameSubmit = this.handleUserNameSubmit.bind(this);
@@ -23,10 +24,9 @@ class Search extends React.Component {
     e.preventDefault();
     let currentValue = this.state.value.replace(" ", "");
     currentValue > "" ? 
-      fetch(`/api/searchuser/${currentValue}`)
+      fetch(`/api/searchuser/${currentValue}/10`)
         .then((res) => res.json())
-        .then((data) => {console.log(data)})
-        // .then((data) => this.setState({ tweets: [...data.includes.tweets] }))
+        .then((data) => this.setState({ tweets: [...data.data], profile: data.profile.data }))
         .catch((err) => console.log(err))
      : alert("Please enter a valid username")
      e.target.reset();
@@ -57,7 +57,7 @@ class Search extends React.Component {
  
 
     const userTweets = this.state.tweets.map(tweet => (
-      <TwitterCard key={tweet.id} tweets={tweet} />
+      <TwitterCard key={tweet.id} tweet={tweet} profile={this.state.profile} />
     ))
 
     const finderTweets = this.state.tweetFinder.map(tweet => (

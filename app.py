@@ -108,21 +108,21 @@ class SearchUser(Resource):
         if not user or not count:
             print("ERROR")
             return jsonify({})
-        # _get_token()
+        _get_token()
         token = g.access_token or app.config["BEARER_TOKEN"]
         print(user+"--"+str(count) + "----" + token)
         headers = {'Authorization': f"Bearer {token}",
                    'Accept': 'application/json', 'Content-Type': 'application/json'}
-
+        params = {"user.fields": "profile_image_url,verified"}
         searchUser = requests.get(f"https://api.twitter.com/2/users/by/username/{user}",
-                                  headers=headers).json()
+                                  headers=headers, params=params).json()
 
         id = searchUser["data"]["id"]
         # do something with id, store in redis or something for a session
         # two step process, because v2 doesn't let you get the tweets from the username
         last_count_tweets = requests.get(
             f"https://api.twitter.com/2/users/{id}/tweets?max_results={count}", headers=headers).json()
-
+        last_count_tweets["profile"] = searchUser
         return jsonify(last_count_tweets)
 
 
